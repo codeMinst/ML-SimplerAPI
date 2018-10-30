@@ -1,24 +1,22 @@
 # -*- coding: utf-8 -*-
-
-from utils import util
-import numpy as np
-import dlib
-import pickle
-from keras_vggface.vggface import VGGFace
-from keras.models import load_model
-from PIL import Image
 import json
-import tensorflow as tf
 import os
-from keras.preprocessing.image import ImageDataGenerator
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+import pickle
 import random
-from keras import models, layers, optimizers
-from keras.callbacks import EarlyStopping
 
+import dlib
 ### Work around - CUDA_ERROR_OUT_OF_MEMORY
 import keras.backend as K
-from pathlib import Path
+import numpy as np
+import tensorflow as tf
+from PIL import Image
+from keras import models, layers, optimizers
+from keras.callbacks import EarlyStopping
+from keras.models import load_model
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+
+from api_face.keras_vggface.vggface import VGGFace
+from utils import util
 
 config = K.tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -51,9 +49,9 @@ resnet_vgg = VGGFace(model='resnet50', include_top=False,
                      input_shape=(224, 224, 3), pooling='max', weights='vggface')
 
 # unknown 판별 모델
-with open('hs_svm_work_unknown.pkl', 'rb') as f:
+with open('./assets/benchmark/svm_work_unknown.pkl', 'rb') as f:#출근
     work_svm = pickle.load(f)
-with open('hs_svm_log_unknown.pkl', 'rb') as f:
+with open('./assets/benchmark/svm_log_unknown.pkl', 'rb') as f:#로그
     log_svm = pickle.load(f)
 
 myModel = None

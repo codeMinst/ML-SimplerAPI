@@ -1,9 +1,11 @@
 import os
-import numpy as np
-import matplotlib.pyplot as plt
-from keras.preprocessing.image import ImageDataGenerator, load_img
 import pickle
-from keras_vggface.vggface import VGGFace
+
+import matplotlib.pyplot as plt
+import numpy as np
+from keras.preprocessing.image import ImageDataGenerator, load_img
+
+from api_face.keras_vggface.vggface import VGGFace
 
 '''
 vgg_conv = VGG16(weights='imagenet',
@@ -152,7 +154,7 @@ if not os.path.isfile('my_model' + day + '.h5'):
         pred_class = np.argmax(prob[errors[i]])
         pred_label = idx2label[pred_class]
 
-        print('Original label:{}, Prediction :{}, confidence : {:.3f}'.format(
+        print('Original label:{}, Prediction :{}, benchmark : {:.3f}'.format(
             fnames[errors[i]].split('/')[0],
             pred_label,
             prob[errors[i]][pred_class]))

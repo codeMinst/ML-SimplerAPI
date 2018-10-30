@@ -1,23 +1,23 @@
 # coding=utf8
 ##########################################################################################
-
 import datetime
 import logging
 import logging.handlers
 import os
-
 from flask import Flask, json, send_from_directory
 from flask import request
 from flask_cors import CORS
 from flask_restful import Api, Resource
-from usol import usolUtil
-from werkzeug import secure_filename
-
+from utils import util
+from werkzeug.utils import secure_filename
 from api_face import UsolDeepCore
 
 ##########################################################################################
 app = Flask(__name__)
-app.config.from_pyfile('flask.cfg')
+# This is the path to the upload directory
+app.config['UPLOAD_FOLDER'] = 'uploads/'
+# These are the extension that we are accepting to be uploaded
+app.config['ALLOWED_EXTENSIONS'] = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'wav', 'webm'])
 # CORS(app)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
@@ -80,8 +80,6 @@ logger = getLogger('restapi', './log/restapi')
 @return
 	{"result": "1", "people": [{"name": "LeeSooYon", "prob": "0.999975"}]}
 """
-
-
 @app.route('/api/validate_face_recognition', methods=['POST'])
 def val_fr():
     logger.info("validate_face_recognition.get start...")
@@ -98,8 +96,6 @@ def val_fr():
 @return
 	{"eval": "0.999","message": "","result": "1"}
 """
-
-
 @app.route('/api/request_training', methods=['GET'])
 def req_training():
     logger.info("request_training Start")
@@ -116,8 +112,6 @@ def req_training():
 @return
 	{"result": "1"}
 """
-
-
 @app.route('/api/register_face', methods=['POST'])
 def register_face():
     logger.info("register_face  start...")
@@ -158,8 +152,6 @@ def register_face():
 @return
 	{'result': '1', 'msg': "OK"}
 """
-
-
 @app.route('/api/register_faces', methods=['POST'])
 def register_faces():
     logger.info("register_faces  start...")
@@ -180,8 +172,6 @@ def register_faces():
 @return
 	result = {'result': '1', 'msg': "OK"}
 """
-
-
 @app.route('/api/register_images', methods=['POST'])
 def register_images():
     logger.info("register_images  start...")
@@ -192,7 +182,7 @@ def register_images():
     else:
 
         strImg = request.json['dataURL']
-        recImg = usolUtil.bas64ToRGB(strImg)
+        recImg = util.bas64ToRGB(strImg)
 
         basename = "image"
         suffix = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
@@ -231,4 +221,4 @@ class CreateUser(Resource):
 api.add_resource(CreateUser, '/user')
 
 if __name__ == '__main__':
-    app.run(host='172.17.2.35', debug=True)
+    app.run(host='127.0.0.1', debug=True)
