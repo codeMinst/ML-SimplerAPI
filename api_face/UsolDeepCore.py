@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from usol import usolUtil
+from utils import util
 import numpy as np
 import dlib
 import pickle
@@ -237,7 +237,7 @@ def getModel(numClasses, train_features, train_labels, validation_features, vali
 
 # 1. mode 0: 출근 1: 입실
 def facePridict(mode, strImg):
-    recImg = usolUtil.bas64ToRGB(strImg)
+    recImg = util.bas64ToRGB(strImg)
     dets = detector(np.array(recImg), 1)
     print("Number of faces detected: {}".format(len(dets)))
 

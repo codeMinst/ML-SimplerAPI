@@ -1,18 +1,19 @@
 # coding=utf8
 ##########################################################################################
 
-import os
-from flask import Flask, jsonify, json, url_for, send_from_directory
-from flask import request
-from flask_restful import reqparse, abort, Api, Resource
-from flask_cors import CORS, cross_origin
+import datetime
 import logging
 import logging.handlers
-import traceback
-import re, datetime
-from werkzeug import secure_filename
-import UsolDeepCore
+import os
+
+from flask import Flask, json, send_from_directory
+from flask import request
+from flask_cors import CORS
+from flask_restful import Api, Resource
 from usol import usolUtil
+from werkzeug import secure_filename
+
+from api_face import UsolDeepCore
 
 ##########################################################################################
 app = Flask(__name__)

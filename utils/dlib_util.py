@@ -1,39 +1,11 @@
-import  base64
-from PIL import Image
 import dlib
 import numpy
 from PIL import Image
 from keras.utils import np_utils
-import io
 import os
+from utils import util
 
-def bas64ToRGB(message):
-    img= base64.b64decode(message.split(',')[1])
-    img = Image.open(io.BytesIO(img)).convert('RGB')
-
-    #return  cv2.cvtColor(numpy.array(img), cv2.COLOR_BGR2RGB)
-    return img
-
-def makeIndexToLabelFromDir(dirPath):
-    idx2label = {}
-    i = 0
-    for dir in os.listdir(dirPath):
-        idx2label[i] = dir
-        i = i + 1
-    #label2index = dict((v, k) for k, v in label2index.items())
-
-    return idx2label
-
-def makeLabelToIndexFromDir(dirPath):
-    idx2label = {}
-    i = 0
-    for dir in os.listdir(dirPath):
-        idx2label[dir] = i
-        i = i + 1
-
-    return idx2label
-
-class withDlib:
+class DlibUtil:
     def __init__(self, predictor_path = 'shape_predictor_68_face_landmarks.dat',
                  face_rec_model_path = 'dlib_face_recognition_resnet_model_v1.dat'):
         self.shapePredictor = dlib.shape_predictor(predictor_path)
@@ -58,7 +30,7 @@ class withDlib:
         win = dlib.image_window()
         xFeatures = []
         yLabel = []
-        label2index = makeLabelToIndexFromDir(path)
+        label2index = util.makeLabelToIndexFromDir(path)
         # Now process all the images
         for root, dirs, files in os.walk(path):
             for file in files:
