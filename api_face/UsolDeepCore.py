@@ -3,7 +3,6 @@ import json
 import os
 import pickle
 import random
-
 import dlib
 ### Work around - CUDA_ERROR_OUT_OF_MEMORY
 import keras.backend as K
@@ -35,7 +34,7 @@ PROB_WORK_BENCHMARK = 0.93  # 출퇴근 해당값보다 작을 때 unknown 처�
 L2_WORK_BENCHMARK = 3.5  # 출퇴근 해당 값보다 클 때 unknown 처리
 PROB_LOG_BENCHMARK = 0.7  # 로깅 해당값보다 작을 때 unknown 처리
 L2_LOG_BENCHMARK = 4.0  # 로깅 해당 값보다 클 때 unknown 처리
-UPLOAD_DIR = './upload_img/'  # 프론트에서 업로드한 원본 이미지 저장
+UPLOAD_DIR = './upload_img/'  # 프론트에서 업로드한 원본 이미지 저장 path
 PEOPLE_DIR = './people/'  # 224 사이즈로 리사이즈한 이미지 저장
 DATA_XY_FILE = 'dataXY.npz'
 MODEL_NAME = 'hs_model.h5'  # 모델명
@@ -388,11 +387,8 @@ def faceTraining(name):
     num_train = int(totalNum * 0.8)
     num_validation = int(totalNum * 0.15) + num_train
     train_features, train_labels, validation_features, validation_labels, test_features, test_labels = \
-        X[:num_train], enY[:num_train], X[num_train:num_validation], enY[num_train:num_validation], X[
-                                                                                                    num_validation:], Y[
-                                                                                                                      num_validation:]
-    print('Total data is {}, train({}), validation({}), test({})'.format(totalNum, len(train_features),
-                                                                         len(validation_features), len(test_features)))
+        X[:num_train], enY[:num_train], X[num_train:num_validation], enY[num_train:num_validation], X[num_validation:], Y[num_validation:]
+    print('Total data is {}, train({}), validation({}), test({})'.format(totalNum, len(train_features),len(validation_features), len(test_features)))
 
     new_model = getModel(numClasses, train_features, train_labels, validation_features, validation_labels)
 
