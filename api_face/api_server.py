@@ -1,4 +1,9 @@
 # coding=utf8
+"""
+안면인식을 위한 restAPI를 flask로 구현하였고,
+간단한 API사용 웹클라이언트 샘플페이지를 트레이닝 이미지 전송 편의상 같은 flask서버,템플릿으로 구성하였다.
+다른 클라이언트 환경에서 트레이닝 이미지 전송을 받기 위한 클래스 디렉토리 생성 및 전송 API도 마련해 두었다.
+"""
 import datetime
 import logging
 import logging.handlers
@@ -44,7 +49,7 @@ def allowed_file(filename):
 
 app = Flask(__name__)
 # This is the path to the upload directory
-app.config['UPLOAD_FOLDER'] = 'uploads/'
+app.config['UPLOAD_FOLDER'] = 'dataset'
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'wav', 'webm'])
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -60,7 +65,7 @@ def after_request(response):
     return response
 
 """
-*얼굴 등록 폴더 생성  요청 
+*이미지 등록 디렉토리 생성요청 
 @parameter
 	1. name 등록하고자 하는 class
 	{name:"park"
@@ -77,7 +82,7 @@ def register_faces():
     return UsolDeepCore.faceRegister(request.json['name'])
 
 """
-*얼굴 이미지 등록 요청 
+*이미지 전송요청 
 @parameter
 	1. name 등록하고자 하는 class
 	2. dataURL: "DataURL String"
@@ -130,7 +135,7 @@ def req_training():
     return UsolDeepCore.faceTraining(request.args.get('name'))
 
 """
-*테스트 검증 요청
+*Classification test
 @parameter
 	1. mode 0: 출근 1: 입실
 	2. img  이미지 string
@@ -165,30 +170,71 @@ class CreateUser(Resource):
 api.add_resource(CreateUser, '/user')
 '''
 
-# Route that will process the file upload
+# https://<<domain>>:<<port>>/api/request_training
+# Params:
+#   name - 모델에 추가할 클래스(사람) 이름
+# Return values:
+#   1 - 디렉토리 생성 성공
+#   0 - 디렉토리 생성 실패
+# Actions:
+#   name 디렉토리 생성
+def createDir(name):
+    result = {}
+    if not os.path.exists(app.config['UPLOAD_FOLDER'] + name):
+        os.makedirs(app.config['UPLOAD_FOLDER'] + name)
+        result = {'result': '1', 'msg': "OK"}
+    else:
+        result = {'result': '0', 'msg': "Name(" + name + ") already exists"}
+
+    jsonString = json.dumps(result)
+    return jsonString
+
 @app.route('/upload', methods=['POST'])
 def upload():
-    # Get the name of the uploaded files
-    uploaded_files = request.files.getlist("file[]")
-    filenames = []
-    for file in uploaded_files:
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            filenames.append(filename)
-    return render_template('upload.html', filenames=filenames)
+    """샘플페이지 flask form 이미지 업로드 function.
+
+    # Arguments
+        className:분류될 라벨 값
+        file[]:복수의 이미지 데이터
+
+    # Returns
+       front 웹페이지 템플릿
+    """
+    className = request.form.get('className')
+    uploadFiles = request.files.getlist("file[]")
+
+    dirPath = os.path.join(app.config['UPLOAD_FOLDER'], className)
+    if not os.path.exists(dirPath):
+        os.makedirs(dirPath)
+        for file in uploadFiles:
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(dirPath, filename))
+        result = render_template('upload.html', result=getTraningDirFiles())
+    else:
+        result = "Name(" + className + ") already exists"
+
+    return result
 
 @app.route('/upload')
 def showUploadPage():
-    return render_template('upload.html')
+    return render_template('upload.html', result=getTraningDirFiles())
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+@app.route('/uploaded/<className>/<fileName>')
+def uploadedFile(className, fileName):
+    return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], className), fileName)
 
 @app.route('/')
 def serverOn():
     return render_template("index.html")
+
+def getTraningDirFiles():
+    classNames = util.getFilesDir(app.config['UPLOAD_FOLDER'])
+    files = []
+    for className in classNames:
+        for file in util.getFilesDir(os.path.join(app.config['UPLOAD_FOLDER'], className)):
+            files.append([className, file])
+    return  files
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True)

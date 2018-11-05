@@ -3,6 +3,12 @@ from PIL import Image
 import io
 import os
 
+def getFilesDir(dirPath):
+    FilesDir = []
+    for c in os.listdir(dirPath):
+        FilesDir.append(c)
+    return FilesDir
+
 def bas64ToRGB(message):
     img= base64.b64decode(message.split(',')[1])
     img = Image.open(io.BytesIO(img)).convert('RGB')

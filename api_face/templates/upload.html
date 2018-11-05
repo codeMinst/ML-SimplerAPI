@@ -1,29 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
-          rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
   </head>
   <body>
     <div class="container">
       <div class="header">
+        <h3 class="text-muted">Predict</h3>
+      </div>
+        <p id="status">File API & FileReader API not supported</p>
+        <p><input type=file></p>
+        <p><div id="holder"></div></p>
+        <p><input type="button" value="predict"/> class is </p>
+      <hr/>
+      <div class="header">
+        <h3 class="text-muted">Training</h3>
+      </div>
+        <p><input type="button" value="training"/></p>
+      <hr/>
+      <div class="header">
         <h3 class="text-muted">Uploaded files</h3>
       </div>
-      <hr/>
       <div>
-      This is a list of the files you just uploaded, click on them to load/download them
+        <p>this is a list of the files you just uploaded, click on them to load/download them</p>
       <ul>
-        {% for file in filenames %}
-          <li><a href="{{url_for('uploaded_file', filename=file)}}">{{file}}</a></li>
+        {% for file in result %}
+          <li><a href="{{url_for('uploadedFile', className=file[0], fileName=file[1])}}">{{file[0]}} : {{file[1]}}</a></li>
         {% endfor %}
       </ul>
       </div>
-      <div class="header">
-        <h3 class="text-muted">Code to manage a Upload</h3>
-      </div>
-      <hr/>
-      </div>
     </div>
   </body>
+  <script>
+    var upload = document.getElementsByTagName('input')[0],
+        holder = document.getElementById('holder'),
+        state = document.getElementById('status');
+
+    if (typeof window.FileReader === 'undefined') {
+      state.className = 'fail';
+    } else {
+      state.className = 'success';
+      state.innerHTML = 'File API & FileReader available';
+    }
+
+    upload.onchange = function (e) {
+      e.preventDefault();
+
+      var file = upload.files[0],
+      reader = new FileReader();
+      reader.onload = function (event) {
+        var img = new Image();
+        img.src = event.target.result;
+        // note: no onload required since we've got the dataurl...I think! :)
+        img.width = 450;
+        holder.innerHTML = '';
+        holder.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+
+      return false;
+    };
+  </script>
 </html>
+
  

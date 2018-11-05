@@ -74,7 +74,7 @@ def loadModel():
 
     return _model, _labeldic
 
-
+#util
 # Actions:
 #   boundingBox 잘라내기 및 이미지 리사이즈
 # Params:
@@ -190,7 +190,7 @@ def getEncodedYY(y):
 
     return len(label_encoder.classes_), label_encoder.classes_, yy
 
-
+#util
 # Action:
 #    x,y 데이타 셔플
 def dataShuffle(x, y):
@@ -329,7 +329,7 @@ def test_facePridict(img_path):
 
     return
 
-
+#util
 # https://<<domain>>:<<port>>/api/request_training
 # Params:
 #   name - 모델에 추가할 클래스(사람) 이름
