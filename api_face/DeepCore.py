@@ -34,11 +34,11 @@ PROB_WORK_BENCHMARK = 0.93  # 출퇴근 해당값보다 작을 때 unknown 처�
 L2_WORK_BENCHMARK = 3.5  # 출퇴근 해당 값보다 클 때 unknown 처리
 PROB_LOG_BENCHMARK = 0.7  # 로깅 해당값보다 작을 때 unknown 처리
 L2_LOG_BENCHMARK = 4.0  # 로깅 해당 값보다 클 때 unknown 처리
-UPLOAD_DIR = './upload_img/'  # 프론트에서 업로드한 원본 이미지 저장 path
+UPLOAD_DIR = './dataset/'  # 프론트에서 업로드한 원본 이미지 저장 path
 PEOPLE_DIR = './people/'  # 224 사이즈로 리사이즈한 이미지 저장
-DATA_XY_FILE = 'dataXY.npz'
-MODEL_NAME = 'hs_model.h5'  # 모델명
-MODEL_LABEL = 'hs_model_label.pkl'  # 레이블 리스트
+DATA_XY_FILE = './feature/dataXY.npz'
+MODEL_NAME = './feature/hs_model.h5'  # 모델명
+MODEL_LABEL = './feature/hs_model_label.pkl'  # 레이블 리스트
 
 global graph
 graph = tf.get_default_graph()
@@ -229,11 +229,21 @@ def getModel(numClasses, train_features, train_labels, validation_features, vali
         model.save(MODEL_NAME)
         return model
 
-
-##############################################################################
-
-# 1. mode 0: 출근 1: 입실
 def facePridict(mode, strImg):
+    """이미지를 전달받아 분류 예측을 하는 function.
+
+        이미지 하나에 여러명의 분류를 하는 것이 가능하며 MAX_DETECT값 으로 몇명의 사람얼굴을 분류 할 것인지 조절한다.
+        unknown은 만들어진 모델을 사용하여 임의의 인물과 정답의 인물 각 probability와 L2distance의 여러케이스를
+        수집하여 정답 비정답 출력의 feature set을 만들어 svm으로 unkown판정을 하는 모델을 만들어 사용하였다.
+
+        # Arguments
+            mode:unknown을 판정을 할 것인지 가장 트레이닝 분류중 가장 유사한 분류로 판정 할 것 인지 여부
+            (0:unkown 1:유사분류)
+            strImg:base64 이미지 문자열
+
+        # Returns
+           예측된 결과갑 json 스트링
+        """
     recImg = util.bas64ToRGB(strImg)
     dets = detector(np.array(recImg), 1)
     print("Number of faces detected: {}".format(len(dets)))
@@ -329,28 +339,7 @@ def test_facePridict(img_path):
 
     return
 
-#util
 # https://<<domain>>:<<port>>/api/request_training
-# Params:
-#   name - 모델에 추가할 클래스(사람) 이름
-# Return values:
-#   1 - 디렉토리 생성 성공
-#   0 - 디렉토리 생성 실패
-# Actions:
-#   name 디렉토리 생성
-def faceRegister(name):
-    result = {}
-    if not os.path.exists(UPLOAD_DIR + name):
-        os.makedirs(UPLOAD_DIR + name)
-        result = {'result': '1', 'msg': "OK"}
-    else:
-        result = {'result': '0', 'msg': "Name(" + name + ") already exists"}
-
-    jsonString = json.dumps(result)
-    return jsonString
-
-
-# https://<<domain>>:<<port>>/api/register_face
 # Params:
 #   name - 모델에 추가할 클래스(사람) 이름
 # Return values:
@@ -415,7 +404,7 @@ def faceTraining(name):
     result = {'result': '1', 'msg': "OK"}
     jsonString = json.dumps(result)
 
-    # Path('./UsolDeepCore.py').touch() ## Work around - for updating global variables
+    # Path('./DeepCore.py').touch() ## Work around - for updating global variables
 
     return jsonString
 

@@ -14,7 +14,7 @@ from flask_cors import CORS
 from flask_restful import Api, Resource
 from utils import util
 from werkzeug.utils import secure_filename
-from api_face import UsolDeepCore
+from api_face import DeepCore
 
 def create_new_folder(local_dir):
     newpath = local_dir
@@ -73,13 +73,28 @@ def after_request(response):
 @return
 	{'result': '1', 'msg': "OK"}
 """
-@app.route('/api/register_faces', methods=['POST'])
-def register_faces():
+# Params:
+#   name - 모델에 추가할 클래스(사람) 이름
+# Return values:
+#   1 - 디렉토리 생성 성공
+#   0 - 디렉토리 생성 실패
+# Actions:
+#   name 디렉토리 생성
+@app.route('/api/create_class_dir', methods=['POST'])
+def createDir():
+    name = request.json['name']
     logger.info("register_faces  start...")
     logger.info(request.headers['Content_Type'])
-    logger.info(request.json)
+    result = {}
+    if not os.path.exists(app.config['UPLOAD_FOLDER'] + name):
+        os.makedirs(app.config['UPLOAD_FOLDER'] + name)
+        result = {'result': '1', 'msg': "OK"}
+    else:
+        result = {'result': '0', 'msg': "Name(" + name + ") already exists"}
 
-    return UsolDeepCore.faceRegister(request.json['name'])
+    jsonString = json.dumps(result)
+    return jsonString
+
 
 """
 *이미지 전송요청 
@@ -132,15 +147,15 @@ def register_images():
 def req_training():
     logger.info("request_training Start")
     logger.info(request.args.get('name'))
-    return UsolDeepCore.faceTraining(request.args.get('name'))
+    return DeepCore.faceTraining(request.args.get('name'))
 
 """
-*Classification test
+*Classification
 @parameter
 	1. mode 0: 출근 1: 입실
 	2. img  이미지 string
 	{mode:"1",
-	 img: "DataURL String"
+	 dataURL: "DataURL String"
 	}
 @return
 	{"result": "1", "people": [{"name": "LeeSooYon", "prob": "0.999975"}]}
@@ -150,8 +165,10 @@ def val_fr():
     logger.info("validate_face_recognition.get start...")
     logger.info(request.headers['Content-Type'])
     logger.info(request.json)
+    print(request.json['mode'])
+    print(request.json['dataURL'])
 
-    return UsolDeepCore.facePridict(request.json['mode'], request.json['dataURL'])
+    return DeepCore.facePridict(request.json['mode'], request.json['dataURL'])
 
 '''
 class CreateUser(Resource):
@@ -169,25 +186,6 @@ class CreateUser(Resource):
 
 api.add_resource(CreateUser, '/user')
 '''
-
-# https://<<domain>>:<<port>>/api/request_training
-# Params:
-#   name - 모델에 추가할 클래스(사람) 이름
-# Return values:
-#   1 - 디렉토리 생성 성공
-#   0 - 디렉토리 생성 실패
-# Actions:
-#   name 디렉토리 생성
-def createDir(name):
-    result = {}
-    if not os.path.exists(app.config['UPLOAD_FOLDER'] + name):
-        os.makedirs(app.config['UPLOAD_FOLDER'] + name)
-        result = {'result': '1', 'msg': "OK"}
-    else:
-        result = {'result': '0', 'msg': "Name(" + name + ") already exists"}
-
-    jsonString = json.dumps(result)
-    return jsonString
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -210,7 +208,7 @@ def upload():
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(dirPath, filename))
-        result = render_template('upload.html', result=getTraningDirFiles())
+        result = render_template('upload.html', result=getClassFiles(className))
     else:
         result = "Name(" + className + ") already exists"
 
@@ -218,7 +216,7 @@ def upload():
 
 @app.route('/upload')
 def showUploadPage():
-    return render_template('upload.html', result=getTraningDirFiles())
+    return render_template('upload.html', result=[])
 
 @app.route('/uploaded/<className>/<fileName>')
 def uploadedFile(className, fileName):
@@ -228,12 +226,10 @@ def uploadedFile(className, fileName):
 def serverOn():
     return render_template("index.html")
 
-def getTraningDirFiles():
-    classNames = util.getFilesDir(app.config['UPLOAD_FOLDER'])
+def getClassFiles(className):
     files = []
-    for className in classNames:
-        for file in util.getFilesDir(os.path.join(app.config['UPLOAD_FOLDER'], className)):
-            files.append([className, file])
+    for file in util.getFilesDir(os.path.join(app.config['UPLOAD_FOLDER'], className)):
+        files.append([className, file])
     return  files
 
 if __name__ == '__main__':

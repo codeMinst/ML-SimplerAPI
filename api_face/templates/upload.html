@@ -2,21 +2,29 @@
 <html lang="en">
   <head>
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <script  src="http://code.jquery.com/jquery-latest.min.js"></script>
   </head>
   <body>
     <div class="container">
       <div class="header">
+        <h3 class="text-muted">Training</h3>
+      </div>
+        <p>
+           {% if result %}
+          <input id="name" type="text" value={{result[0][0]}} readonly="readonly" />
+          {% else %}
+          <input id="name" type="text" value="" readonly="readonly"/>
+           {% endif %}
+          <input id="training" type="button" value="training" />
+        </p>
+      <hr/>
+      <div class="header">
         <h3 class="text-muted">Predict</h3>
       </div>
         <p id="status">File API & FileReader API not supported</p>
-        <p><input type=file></p>
+        <p><input id="selector" type=file></p>
         <p><div id="holder"></div></p>
-        <p><input type="button" value="predict"/> class is </p>
-      <hr/>
-      <div class="header">
-        <h3 class="text-muted">Training</h3>
-      </div>
-        <p><input type="button" value="training"/></p>
+        <p><input id="predict" type="button" value="predict"/> class is </p>
       <hr/>
       <div class="header">
         <h3 class="text-muted">Uploaded files</h3>
@@ -32,7 +40,42 @@
     </div>
   </body>
   <script>
-    var upload = document.getElementsByTagName('input')[0],
+    var dataUrl = ''
+    $(document).ready(function () {
+      $('#training').on('click', function () {
+        $.ajax({
+            url : "/api/request_training?name=" + $('#name').val(),
+            success : function (data) {
+                alert(data);
+            },
+            error : function (data) {
+                alert(data);
+            }
+         });
+       })
+
+       $('#predict').on('click', function () {
+        $.ajax({
+            url : '/api/validate_face_recognition',
+            dataType: 'json',
+            type: 'post',
+            contentType: 'application/json',
+            data: JSON.stringify({
+              mode: '0',
+              dataURL: dataUrl
+            }),
+            dataType: 'json',
+            success : function (data) {
+                alert(data);
+            },
+            error : function (data) {
+                alert(data);
+            }
+         });
+       })
+    });
+
+    var upload = document.getElementById('selector'),
         holder = document.getElementById('holder'),
         state = document.getElementById('status');
 
@@ -50,7 +93,7 @@
       reader = new FileReader();
       reader.onload = function (event) {
         var img = new Image();
-        img.src = event.target.result;
+        dataUrl = img.src = event.target.result;
         // note: no onload required since we've got the dataurl...I think! :)
         img.width = 450;
         holder.innerHTML = '';
