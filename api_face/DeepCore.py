@@ -46,18 +46,12 @@ graph = tf.get_default_graph()
 detector = dlib.get_frontal_face_detector()
 resnet_vgg = VGGFace(model='resnet50', include_top=False,
                      input_shape=(224, 224, 3), pooling='max', weights='vggface')
-
-# unknown 판별 모델
-with open('./assets/benchmark/svm_work_unknown.pkl', 'rb') as f:#출근
-    work_svm = pickle.load(f)
-with open('./assets/benchmark/svm_log_unknown.pkl', 'rb') as f:#로그
-    log_svm = pickle.load(f)
-
 myModel = None
 LabelDic = None
-svm = None
 
-
+# unknown 판별 모델
+with open('./assets/benchmark/svm_unknown.pkl', 'rb') as f:
+    svm_unknown = pickle.load(f)
 ###############################################################################
 # Private functions
 ###############################################################################
@@ -273,23 +267,18 @@ def facePridict(mode, strImg):
                 name, score = LabelDic[predictions[0]], str(np.amax(prob[0]))
 
                 if (mode == "0"):
-                    svm = work_svm
-                    result = svm.predict(float(score))
-                else:
-                    svm = log_svm
                     # idx = np.where(np.argmax(yy, axis=1) == predictions[0])[0]
                     idx = np.where(yy == name)[0]
                     l2dists = []
                     for k in idx:
                         dist = np.linalg.norm(f.reshape(-1) - xx[k], axis=None, ord=None)
                         l2dists.append(dist)
-                    result = svm.predict([float(score), np.min(l2dists)])
+                    temp = [[float(score), np.min(l2dists)]]
+                    if 0 == int(svm_unknown.predict(temp)):
+                        name, score = 'unknown', '0'
 
                 print(name + '////prob--' + score + '////--' + str(result))
-                if 0 == int(result):
-                    name, score = 'unknown', '0'
                 people.append({'name': name, 'prob': score})
-
         result = {'result': '1', 'people': people}
 
     jsonString = json.dumps(result)
