@@ -1,0 +1,8 @@
+# 튜토리얼과 관련 된 경진대회를 찾아보기
+kaggle competitions list -s tutorial
+# 타이타닉 경진대회 파일을 다운로드 받는다.
+kaggle competitions download -c titanic
+# 설문조사와 관련된 데이터셋을 찾아본다.
+!kaggle datasets list -s survey
+# 경진대회의 약관(rule)에 동의했다면 API로 서브미션이 가능하다.
+kaggle competitions submit -c word2vec-nlp-tutorial -f ./word2vec-nlp-tutorial/data/tutorial_4_tfidf_xgboost.csv -m 'API submit msg'
