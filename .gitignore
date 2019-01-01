@@ -107,3 +107,6 @@ test.py
 *.jpg
 api_face/dataset/
 api_face/feature/
+*.jpeg
+*.png
+*.gif
