@@ -105,8 +105,6 @@ venv.bak/
 .mypy_cache/
 test.py
 *.jpg
-api_face/dataset/
-api_face/feature/
 *.jpeg
 *.png
 *.gif
