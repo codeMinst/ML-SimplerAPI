@@ -30,10 +30,7 @@ else:
     # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 MAX_DETECT = 4
-PROB_WORK_BENCHMARK = 0.93  # 출퇴근 해당값보다 작을 때 unknown 처리
-L2_WORK_BENCHMARK = 3.5  # 출퇴근 해당 값보다 클 때 unknown 처리
-PROB_LOG_BENCHMARK = 0.7  # 로깅 해당값보다 작을 때 unknown 처리
-L2_LOG_BENCHMARK = 4.0  # 로깅 해당 값보다 클 때 unknown 처리
+PROB_BENCHMARK = 0.9
 UPLOAD_DIR = './dataset/'  # 프론트에서 업로드한 원본 이미지 저장 path
 PEOPLE_DIR = './people/'  # 224 사이즈로 리사이즈한 이미지 저장
 DATA_XY_FILE = './feature/dataXY.npz'
@@ -228,7 +225,7 @@ def facePridict(mode, strImg):
 
         이미지 하나에 여러명의 분류를 하는 것이 가능하며 MAX_DETECT값 으로 몇명의 사람얼굴을 분류 할 것인지 조절한다.
         unknown은 만들어진 모델을 사용하여 임의의 인물과 정답의 인물 각 probability와 L2distance의 여러케이스를
-        수집하여 정답 비정답 출력의 feature set을 만들어 svm으로 unkown판정을 하는 모델을 만들어 사용하였다.
+        수집하여 정답 비정답 출력의 data set을 만들어 svm으로 unkown판정을 하는 모델을 만들어 사용하였다.
 
         # Arguments
             mode:unknown을 판정을 할 것인지 가장 트레이닝 분류중 가장 유사한 분류로 판정 할 것 인지 여부
@@ -237,7 +234,7 @@ def facePridict(mode, strImg):
 
         # Returns
            예측된 결과갑 json 스트링
-        """
+    """
     recImg = util.bas64ToRGB(strImg)
     dets = detector(np.array(recImg), 1)
     print("Number of faces detected: {}".format(len(dets)))
@@ -289,8 +286,6 @@ def facePridict(mode, strImg):
 # test function
 #    img_path : '../visitor/pre_over_100/people/test/ParkMinjeong/51.jpg'
 def test_facePridict(img_path):
-    PROB_BENCHMARK = PROB_WORK_BENCHMARK
-    L2_BENCHMARK = L2_WORK_BENCHMARK
     img = Image.open(img_path)
     dets = detector(np.array(img), 1)
     print("Number of faces detected: {}".format(len(dets)))

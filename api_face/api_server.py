@@ -165,8 +165,6 @@ def val_fr():
     logger.info("validate_face_recognition.get start...")
     logger.info(request.headers['Content-Type'])
     logger.info(request.json)
-    print(request.json['mode'])
-    print(request.json['dataURL'])
 
     return DeepCore.facePridict(request.json['mode'], request.json['dataURL'])
 
