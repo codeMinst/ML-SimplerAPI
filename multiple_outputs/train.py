@@ -66,6 +66,7 @@ colorLabels = np.array(colorLabels)
 
 # binarize both sets of labels(one hot encoding)
 # sklearn 전처리(https://datascienceschool.net/view-notebook/f43be7d6515b48c0beb909826993c856/)
+# LabelBinarizer변수.fit_transform 하면 LabelBinarizer변수에 분류 값이 저장되고 array의 각 값들을 원핫인코딩하여 리턴한다
 print("[INFO] binarizing labels...")
 categoryLB = LabelBinarizer()
 colorLB = LabelBinarizer()
