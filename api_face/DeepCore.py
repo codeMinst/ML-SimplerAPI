@@ -263,7 +263,7 @@ def facePridict(mode, strImg):
                 prob = myModel.predict(f.reshape(1, -1))
                 name, score = LabelDic[predictions[0]], str(np.amax(prob[0]))
 
-                if (mode == "0"):
+                if (mode == "1"):
                     # idx = np.where(np.argmax(yy, axis=1) == predictions[0])[0]
                     idx = np.where(yy == name)[0]
                     l2dists = []
