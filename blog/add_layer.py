@@ -1,7 +1,7 @@
 from keras.applications import ResNet50
 from keras.layers import Dense, Input, Activation
 from keras.models import Model
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, LambdaCallback
 from keras import optimizers
 from keras.preprocessing.image import ImageDataGenerator
 from keras.layers.normalization import BatchNormalization
@@ -39,13 +39,14 @@ model.compile(loss='categorical_crossentropy',
                   optimizer=optimizers.adam(),
                   metrics=['acc'])
 
+print_weights = LambdaCallback(on_epoch_end=lambda epoch, logs: print(model.layers[3].get_weights()))
 early_stopping = EarlyStopping(patience=15, mode='auto', monitor='val_loss')
 history = model.fit_generator(train_generator,
                               steps_per_epoch=25,
                               epochs=100,
                               validation_data=val_generator,
                               validation_steps=5,
-                              callbacks=[early_stopping])
+                              callbacks=[early_stopping, print_weights])
 
 #모델 평가
 print("-- Evaluate --")
